@@ -27,6 +27,13 @@ import {
   YAxis,
 } from 'recharts'
 import './App.css'
+import {
+  LiabilityDistributionChart,
+  MonteCarloChart,
+  RiskDistributionChart,
+  ShapImpactChart,
+  WhatIfResponseChart,
+} from './charts.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? null : 'http://127.0.0.1:8000')
 
@@ -464,6 +471,7 @@ function App() {
           <nav className="hidden items-center gap-6 text-sm text-slate-600 md:flex">
             <button type="button" onClick={() => scrollToSection('intake')} className="transition hover:text-slate-950">Inputs</button>
             <button type="button" onClick={() => scrollToSection('results')} className="transition hover:text-slate-950">Results</button>
+            <button type="button" onClick={() => scrollToSection('analytics')} className="transition hover:text-slate-950">Analytics</button>
             <button type="button" onClick={() => scrollToSection('playground')} className="transition hover:text-slate-950">What-if</button>
             <span className="holo-pill rounded-full border border-slate-300/80 px-3 py-1 text-[0.62rem] uppercase tracking-[0.26em] text-slate-600">
               INR Mode
@@ -843,6 +851,23 @@ function App() {
               </div>
             </Motion.div>
           </div>
+        </section>
+
+        <section id="analytics" className="space-y-6">
+          <SectionHeading
+            eyebrow="Advanced Analytics"
+            title="Five lenses. One health story."
+            body="Probabilistic distributions, causal explanations, stochastic simulations, cost modeling, and response surfaces — the same outputs a clinical ML pipeline would produce."
+          />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <RiskDistributionChart prediction={prediction} />
+            <ShapImpactChart explanation={explanation} inputs={inputs} />
+          </div>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <MonteCarloChart prediction={prediction} />
+            <LiabilityDistributionChart simulation={simulation} />
+          </div>
+          <WhatIfResponseChart inputs={inputs} />
         </section>
 
         <section id="playground" className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
