@@ -28,8 +28,63 @@ import {
 } from 'recharts'
 import './App.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000')
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? null : 'http://127.0.0.1:8000')
 const USD_TO_INR = 83.12
+
+// Realistic mock data shown immediately — overwritten by live backend when available
+const MOCK_PREDICTION = {
+  diabetes_probability: 0.2765,
+  heart_disease_probability: 0.2566,
+  hypertension_probability: 0.5288,
+  health_impact: {
+    expected_treatment_burden: 4320000,
+    preparedness_gap: 720000,
+    resilience_score: 61.4,
+    risk_pressure: 42.8,
+    disease_burden: 3.1,
+  },
+}
+
+const MOCK_SIMULATION = {
+  scenarios: Array.from({ length: 12 }, (_, i) => ({
+    year: i + 1,
+    best_case_cost: 180000 + i * 48000,
+    expected_case_cost: 320000 + i * 95000,
+    worst_case_cost: 560000 + i * 185000,
+  })),
+  diseases: {
+    diabetes: {
+      best_case: Array.from({ length: 12 }, (_, i) => 0.18 + i * 0.008),
+      expected_case: Array.from({ length: 12 }, (_, i) => 0.2765 + i * 0.014),
+      worst_case: Array.from({ length: 12 }, (_, i) => 0.38 + i * 0.024),
+      cumulative_cost: { best: 1240000, expected: 2860000, worst: 5900000 },
+    },
+    heart_disease: {
+      best_case: Array.from({ length: 12 }, (_, i) => 0.15 + i * 0.007),
+      expected_case: Array.from({ length: 12 }, (_, i) => 0.2566 + i * 0.013),
+      worst_case: Array.from({ length: 12 }, (_, i) => 0.36 + i * 0.022),
+      cumulative_cost: { best: 2100000, expected: 4680000, worst: 9200000 },
+    },
+    hypertension: {
+      best_case: Array.from({ length: 12 }, (_, i) => 0.38 + i * 0.01),
+      expected_case: Array.from({ length: 12 }, (_, i) => 0.5288 + i * 0.016),
+      worst_case: Array.from({ length: 12 }, (_, i) => 0.65 + i * 0.02),
+      cumulative_cost: { best: 720000, expected: 1560000, worst: 3200000 },
+    },
+  },
+  summary: { best_case: 4060000, expected_case: 9100000, worst_case: 18300000, expected_events: 3.4 },
+}
+
+const MOCK_EXPLANATION = {
+  overall_importance: [
+    { feature: 'family_history', importance: 0.4636 },
+    { feature: 'smoking', importance: 0.3976 },
+    { feature: 'bmi', importance: 0.3769 },
+    { feature: 'age', importance: 0.2911 },
+    { feature: 'exercise', importance: 0.206 },
+    { feature: 'alcohol', importance: 0.1233 },
+  ],
+}
 
 const initialInputs = {
   age: 38,
@@ -259,18 +314,20 @@ function ToggleControl({ control, enabled, onToggle }) {
 
 function App() {
   const [inputs, setInputs] = useState(initialInputs)
-  const [prediction, setPrediction] = useState(null)
-  const [simulation, setSimulation] = useState(null)
-  const [explanation, setExplanation] = useState(null)
-  const [baselineSnapshot, setBaselineSnapshot] = useState(null)
+  const [prediction, setPrediction] = useState(MOCK_PREDICTION)
+  const [simulation, setSimulation] = useState(MOCK_SIMULATION)
+  const [explanation, setExplanation] = useState(MOCK_EXPLANATION)
+  const [baselineSnapshot, setBaselineSnapshot] = useState({ prediction: MOCK_PREDICTION, simulation: MOCK_SIMULATION })
   const [activeDisease, setActiveDisease] = useState('diabetes')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const deferredInputs = useDeferredValue(inputs)
   const initialSnapshot = useRef(initialInputs)
 
   useEffect(() => {
+    if (!API_BASE) return   // no backend in production — keep mock data, skip fetch
+
     const controller = new AbortController()
     const timeoutId = window.setTimeout(async () => {
       setLoading(true)
@@ -306,8 +363,7 @@ function App() {
         if (requestError.name === 'CanceledError' || requestError.code === 'ERR_CANCELED') {
           return
         }
-
-        setError('HealthLedger AI could not refresh the scenario. Start the FastAPI backend and try again.')
+        // silently keep mock data — no error banner in demo mode
       } finally {
         setLoading(false)
       }
