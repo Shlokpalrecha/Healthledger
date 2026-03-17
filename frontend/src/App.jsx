@@ -29,7 +29,6 @@ import {
 import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? null : 'http://127.0.0.1:8000')
-const USD_TO_INR = 83.12
 
 // Realistic mock data shown immediately — overwritten by live backend when available
 const MOCK_PREDICTION = {
@@ -48,27 +47,33 @@ const MOCK_PREDICTION = {
 const MOCK_SIMULATION = {
   scenarios: Array.from({ length: 12 }, (_, i) => ({
     year: i + 1,
-    best_case_cost: 180000 + i * 48000,
-    expected_case_cost: 320000 + i * 95000,
-    worst_case_cost: 560000 + i * 185000,
+    best_case: 180000 + i * 48000,
+    expected_case: 320000 + i * 95000,
+    worst_case: 560000 + i * 185000,
   })),
   diseases: {
     diabetes: {
       best_case: Array.from({ length: 12 }, (_, i) => 0.18 + i * 0.008),
       expected_case: Array.from({ length: 12 }, (_, i) => 0.2765 + i * 0.014),
       worst_case: Array.from({ length: 12 }, (_, i) => 0.38 + i * 0.024),
+      event_probability: 0.312,
+      cumulative_cost_expected: 2860000,
       cumulative_cost: { best: 1240000, expected: 2860000, worst: 5900000 },
     },
     heart_disease: {
       best_case: Array.from({ length: 12 }, (_, i) => 0.15 + i * 0.007),
       expected_case: Array.from({ length: 12 }, (_, i) => 0.2566 + i * 0.013),
       worst_case: Array.from({ length: 12 }, (_, i) => 0.36 + i * 0.022),
+      event_probability: 0.284,
+      cumulative_cost_expected: 4680000,
       cumulative_cost: { best: 2100000, expected: 4680000, worst: 9200000 },
     },
     hypertension: {
       best_case: Array.from({ length: 12 }, (_, i) => 0.38 + i * 0.01),
       expected_case: Array.from({ length: 12 }, (_, i) => 0.5288 + i * 0.016),
       worst_case: Array.from({ length: 12 }, (_, i) => 0.65 + i * 0.02),
+      event_probability: 0.541,
+      cumulative_cost_expected: 1560000,
       cumulative_cost: { best: 720000, expected: 1560000, worst: 3200000 },
     },
   },
@@ -179,7 +184,7 @@ function formatNumber(value, variant = 'number') {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0,
-    }).format(value * USD_TO_INR)
+    }).format(value)
   }
 
   if (variant === 'score') {
