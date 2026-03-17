@@ -1,0 +1,20 @@
+{
+  "diabetes": {
+    "annual_cost": 180000,
+    "event_cost": 750000,
+    "severity_multiplier": [1.0, 2.0, 4.0],
+    "description": "Includes insulin, monitoring, and outpatient visits"
+  },
+  "heart_disease": {
+    "annual_cost": 320000,
+    "event_cost": 2200000,
+    "severity_multiplier": [1.0, 2.5, 5.0],
+    "description": "Includes stenting, medication, and cardiac rehab"
+  },
+  "hypertension": {
+    "annual_cost": 90000,
+    "event_cost": 850000,
+    "severity_multiplier": [1.0, 1.8, 3.5],
+    "description": "Includes BP medication and regular monitoring"
+  }
+}
